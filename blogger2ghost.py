@@ -42,6 +42,7 @@ if __name__ == "__main__":
         published = dateToTimestampMs(entry.getElementsByTagName('published')[0].firstChild.nodeValue)
         updated = dateToTimestampMs(entry.getElementsByTagName('updated')[0].firstChild.nodeValue)
         content = entry.getElementsByTagName('content')[0].firstChild.nodeValue
+        status = 'draft' if len(entry.getElementsByTagName('app:draft')) > 0 else 'published'
 
         # slug must be unique. Should we add the id to the string?
         slug = title
@@ -60,7 +61,7 @@ if __name__ == "__main__":
         converted_entry['image'] = None
         converted_entry['featured'] = 0
         converted_entry['page'] = 0
-        converted_entry['status'] = 'published'
+        converted_entry['status'] = status
         converted_entry['language'] = "en_US"
         converted_entry['meta_title'] = None
         converted_entry['meta_description'] = None
