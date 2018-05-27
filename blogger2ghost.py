@@ -9,18 +9,25 @@ import html2text
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print "Usage: %s <blogger.xml> <ghost.json>" % (sys.argv[0])
+        print ("Usage: {} <blogger.xml> <ghost.json>".format(sys.argv[0]))
         sys.exit(-1)
  
     try:
         xmldoc = minidom.parse(sys.argv[1])
     except Exception as e:
-        print "ERROR: Could not parse input file: %s" % (e)
+        print ("ERROR: Could not parse input file: {}".format(e))
         sys.exit(1)
 
     entry_list = xmldoc.getElementsByTagName('entry')
     converted_entries = [ ]
     id = 1
+	
+    def dateToTimestampMs(d):
+        dt = dateutil.parser.parse(d)
+        dtt = dt.timetuple()
+		# ghost wants it in ms, so multiply by 1000
+        return int(time.mktime(dtt) * 1000)
+
     for entry in entry_list:
         category_node = entry.getElementsByTagName('category')[0]
         kind = category_node.attributes['term'].value
@@ -32,10 +39,8 @@ if __name__ == "__main__":
             continue
         
         title = entry.getElementsByTagName('title')[0].firstChild.nodeValue
-        published = entry.getElementsByTagName('published')[0].firstChild.nodeValue
-        published = long(dateutil.parser.parse(published).strftime('%s')) * 1000
-        updated = entry.getElementsByTagName('updated')[0].firstChild.nodeValue
-        updated = long(dateutil.parser.parse(updated).strftime('%s')) * 1000
+        published = dateToTimestampMs(entry.getElementsByTagName('published')[0].firstChild.nodeValue)
+        updated = dateToTimestampMs(entry.getElementsByTagName('updated')[0].firstChild.nodeValue)
         content = entry.getElementsByTagName('content')[0].firstChild.nodeValue
 
         # slug must be unique. Should we add the id to the string?
@@ -71,7 +76,7 @@ if __name__ == "__main__":
 
     final_content = dict()
     final_content['meta'] = { 
-        'exported_on': long(time.time()) * 1000, 
+        'exported_on': int(time.time()) * 1000, 
         'version' : '000'
         }
     final_content['data'] = {
